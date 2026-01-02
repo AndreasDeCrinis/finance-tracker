@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-end gap-3 flex-wrap">
+  <div>
+    <h1 class="h3 mb-1">Accounts</h1>
+    <div class="text-muted">Create and manage your accounts.</div>
+  </div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-12 col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h6 mb-3">New account</h2>
+        <form method="post" action="{{ url_for('accounts_create') }}" class="vstack gap-3">
+          <div>
+            <label class="form-label">Name</label>
+            <input class="form-control" name="name" placeholder="e.g., Erste Bank, Flatex Depot" required>
+          </div>
+
+          <div>
+            <label class="form-label">Type</label>
+            <select class="form-select" name="account_type">
+              <option value="bank">Bank</option>
+              <option value="depot">Depot / ETF</option>
+              <option value="broker">Broker</option>
+              <option value="cash">Cash</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="monthly_enabled" name="monthly_enabled">
+            <label class="form-check-label" for="monthly_enabled">Monthly incoming payment</label>
+          </div>
+
+          <div>
+            <label class="form-label">Monthly amount</label>
+            <input class="form-control" name="monthly_amount" placeholder="e.g., 200 or 200,00" value="0">
+            <div class="form-text">Only used if monthly incoming is enabled.</div>
+          </div>
+
+          <button class="btn btn-primary">Create account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Existing accounts</h2>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th class="text-end">Current balance</th>
+                <th class="text-end">Monthly incoming</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for a in accounts %}
+              <tr>
+                <td class="fw-medium">{{ a.name }}</td>
+                <td class="text-muted">{{ a.account_type }}</td>
+                <td class="text-end">{{ "{:,.2f}".format(a.current_balance) }}</td>
+                <td class="text-end">
+                  {% if a.monthly_payment_enabled %}
+                    {{ "{:,.2f}".format(a.monthly_payment) }}
+                  {% else %}
+                    <span class="badge text-bg-light border">Off</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('account_detail', account_id=a.id) }}">Open</a>
+                </td>
+              </tr>
+            {% endfor %}
+            {% if not accounts %}
+              <tr><td colspan="5" class="text-muted">No accounts yet.</td></tr>
+            {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

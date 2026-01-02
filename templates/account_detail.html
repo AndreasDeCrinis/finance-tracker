@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+  <div>
+    <div class="text-muted small">{{ account.account_type|upper }}</div>
+    <h1 class="h3 mb-1">{{ account.name }}</h1>
+    <div class="text-muted">Current balance: <span class="fw-semibold">{{ "{:,.2f}".format(account.current_balance) }}</span></div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <form method="post" action="{{ url_for('account_delete', account_id=account.id) }}" onsubmit="return confirm('Delete account and all balances?');">
+      <button class="btn btn-outline-danger">Delete</button>
+    </form>
+    <a class="btn btn-outline-secondary" href="{{ url_for('accounts_list') }}">Back</a>
+  </div>
+</div>
+
+<div class="card my-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="h6 mb-1">Account performance</div>
+        <div class="text-muted small">Balance over time</div>
+      </div>
+    </div>
+
+    <div class="chart-wrap mt-3">
+      <canvas id="accountChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+  const accLabels = {{ chart_labels|tojson }};
+  const accValues = {{ chart_values|tojson }};
+
+  const ctxAcc = document.getElementById('accountChart');
+
+  new Chart(ctxAcc, {
+    type: 'line',
+    data: {
+      labels: accLabels,
+      datasets: [{
+        label: 'Balance',
+        data: accValues,
+        borderWidth: 2,
+        tension: 0.25,
+        pointRadius: 2,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { grid: { display: false }},
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+
+<div class="row g-3 mt-1">
+  <div class="col-12 col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Settings</h2>
+        <form method="post" action="{{ url_for('account_settings', account_id=account.id) }}" class="vstack gap-3">
+          <div>
+            <label class="form-label">Name</label>
+            <input class="form-control" name="name" value="{{ account.name }}" required>
+          </div>
+
+          <div>
+            <label class="form-label">Type</label>
+            <select class="form-select" name="account_type">
+              {% for t in ["bank","depot","broker","cash","other"] %}
+                <option value="{{ t }}" {% if account.account_type==t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="monthly_enabled" name="monthly_enabled"
+                   {% if account.monthly_payment_enabled %}checked{% endif %}>
+            <label class="form-check-label" for="monthly_enabled">Monthly incoming payment</label>
+          </div>
+
+          <div>
+            <label class="form-label">Monthly amount</label>
+            <input class="form-control" name="monthly_amount" value="{{ account.monthly_payment_amount }}">
+          </div>
+
+          <button class="btn btn-primary">Save settings</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Add / update balance</h2>
+        <form method="post" action="{{ url_for('balance_add', account_id=account.id) }}" class="vstack gap-3">
+          <div>
+            <label class="form-label">As of date</label>
+            <input class="form-control" type="date" name="as_of_date" value="{{ (account.balances[0].as_of_date if account.balances else '') }}">
+            <div class="form-text">If a balance already exists for the same date, it will be updated.</div>
+          </div>
+
+          <div>
+            <label class="form-label">Balance</label>
+            <input class="form-control" name="balance" placeholder="e.g., 12345,67" required>
+          </div>
+
+          <button class="btn btn-success">Save balance</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-12 col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="h6 mb-0">Balance history</h2>
+          <div class="text-muted small">{{ account.balances|length }} entries</div>
+        </div>
+
+        <hr/>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th class="text-end">Balance</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in account.balances %}
+              <tr>
+                <td class="text-muted">{{ p.as_of_date }}</td>
+                <td class="text-end fw-medium">{{ "{:,.2f}".format(p.balance) }}</td>
+                <td class="text-end">
+                  <form method="post" action="{{ url_for('balance_delete', point_id=p.id) }}" onsubmit="return confirm('Delete this balance point?');">
+                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if not account.balances %}
+              <tr><td colspan="3" class="text-muted">No balances yet.</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

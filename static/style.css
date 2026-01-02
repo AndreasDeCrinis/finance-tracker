@@ -1,0 +1,49 @@
+:root{
+  --card-radius: 16px;
+}
+
+body{
+  background: #f6f7fb;
+}
+
+.navbar{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.card{
+  border: 0;
+  border-radius: var(--card-radius);
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+}
+
+.account-card{
+  transition: transform .12s ease, box-shadow .12s ease;
+  color: inherit;
+}
+.account-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 35px rgba(0,0,0,.09);
+}
+
+.stat-card{
+  background: white;
+  border-radius: var(--card-radius);
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+  padding: 14px 16px;
+  min-width: 220px;
+}
+.stat-card .label{
+  color: #6c757d;
+  font-size: .85rem;
+}
+.stat-card .value{
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.chart-wrap{
+  height: 320px;
+}
