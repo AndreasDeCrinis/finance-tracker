@@ -1,0 +1,3 @@
+scripts/*.csv
+instance/finance.db
+__pycache__
