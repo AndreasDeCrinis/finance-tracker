@@ -243,6 +243,7 @@ def account_detail(account_id: int):
         account=acc,
         chart_labels=labels,
         chart_values=values,
+        today=date.today().isoformat(),  # default date value for new balance entry
     )
 
 
