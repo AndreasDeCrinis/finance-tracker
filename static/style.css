@@ -12,6 +12,14 @@ body{
   z-index: 10;
 }
 
+.app-logo{
+  width: 2rem;
+  height: 2rem;
+  border-radius: .55rem;
+  box-shadow: 0 6px 16px rgba(15, 118, 110, .18);
+  flex: 0 0 auto;
+}
+
 .card{
   border: 0;
   border-radius: var(--card-radius);
